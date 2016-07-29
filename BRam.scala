@@ -1,4 +1,4 @@
-package BRam
+package Templates
 
 import Chisel._
  
@@ -18,10 +18,6 @@ import Chisel._
 	val bRam_rw = Mem(UInt(width = bandwidth), n, seqRead = true)
 	val reg_raddr = Reg(UInt()) /* Flip-Flop register for reads */
 
-	/* just for testing */
-	for (i <- 0 until n) {
-		bRam_rw(i) := UInt(i * 3)
-	}
 
 	when (io.write_en) {
 		bRam_rw(io.write_addr) := io.write_data
@@ -29,6 +25,6 @@ import Chisel._
 
 	/* Sequential Read to block RAM */
 	reg_raddr := io.read_addr
-	io.read_out := reg_raddr
+	io.read_out := bRam_rw(reg_raddr)
 
  }

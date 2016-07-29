@@ -45,6 +45,3 @@ class DotProductPipe(w : Int) extends Module {
 	io.pipe_reset := (pipe_state === pipeReset)
 }
 
-class DotProductPipeTests (c: DotProductPipe) extends Tester(c) {
-
-}

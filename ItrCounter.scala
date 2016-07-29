@@ -15,11 +15,11 @@ class ItrCounter(w : Int) extends Module {
  
    val currCount = Reg(init = UInt(0, width = w))
 
-   /* counter should go up to max - 1 */
-   val hitMax = (currCount >= io.max - UInt(1))
+   /* counter should go up to max - 1 --> counters from 0 to max - 1 (max times) */
+   val hitMax = (currCount >= io.max)
   
    when (io.en_count) {
-   		currCount := Mux(hitMax, io.max - UInt(1), currCount + UInt(1))
+   		currCount := Mux(hitMax, UInt(0), currCount + UInt(1))
    }
    .elsewhen (io.reset) {
    		currCount := UInt(0)
@@ -27,8 +27,4 @@ class ItrCounter(w : Int) extends Module {
 
    io.cout := currCount
    io.done := hitMax
-}
-
-class ItrCounterTestings (c: ItrCounter) extends Tester(c) {
-
 }

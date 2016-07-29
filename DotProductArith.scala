@@ -9,6 +9,7 @@ class DotProductArith(w : Int) extends Module {
 		val v1 = UInt(INPUT, w)
 		val v2 = UInt(INPUT, w)
 		val reset = Bool(INPUT)
+		val full_reset = Bool(INPUT) /* reset to 0 */
 		val en = Bool(INPUT)
 
 		val dotproduct = UInt(OUTPUT, w*w)
@@ -18,7 +19,7 @@ class DotProductArith(w : Int) extends Module {
 	val productV = io.v1(w -1, 0) * io.v2(w - 1, 0)
 
 	val productReg = Reg(init = UInt(0, w*w)) /* pipeline register */ 
-	when (io.reset) {
+	when (io.reset && !io.en) {
 		productReg := UInt(0)
 	}
 	.otherwise {
@@ -28,14 +29,14 @@ class DotProductArith(w : Int) extends Module {
 
 	val acc = Reg(init = UInt(0, w*w))
 	when (io.reset) {
-		acc := UInt(0)
+		acc := productReg
 	}
 	.elsewhen (io.en) {
  		acc := acc + productReg 
 	}
 
 	io.dotproduct := acc
-}
+} 
 
 class DotProductArithTests (c: DotProductArith) extends Tester(c) {
 

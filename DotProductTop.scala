@@ -2,7 +2,6 @@ package DP
 
 import Chisel._
 import Templates._
-import BRam._
 import ArithOperations._
 import DataPaths._
 
@@ -13,6 +12,10 @@ class DotProductTop(w : Int) extends Module {
 
 		val cmd = Bool(INPUT)
 		val status = UInt(OUTPUT)
+
+    val input_data = UInt(INPUT, w) /* memory controller holder for now */
+    val input_addr = UInt(INPUT, 5)
+
 
     val result = UInt(OUTPUT, w)
 	}
@@ -27,7 +30,14 @@ class DotProductTop(w : Int) extends Module {
 
    val dp_arith = Module(new DotProductArith(w))
 
+    /* Memotry Control -- for now */
+   dp_ram1.io.write_en := (state === topInit)
+   dp_ram1.io.write_addr := io.input_addr
+   dp_ram1.io.write_data := io.input_data  
 
+   dp_ram2.io.write_en := (state === topInit)
+   dp_ram2.io.write_addr := io.input_addr
+   dp_ram2.io.write_data := io.input_data  
 
    /* Counter */
    val counter = Module(new ItrCounter(w))
@@ -87,6 +97,17 @@ class DotProductTop(w : Int) extends Module {
 
 class DotProductTopTests (c: DotProductTop) extends Tester(c) {
 
+  def input_ramdata(waddr : Int, data : Int) {
+    poke(c.io.input_data, data)
+    poke(c.io.input_addr, waddr)
+    step(1)
+  }
+  poke(c.io.cmd, 0)
+  for (i <- 0 until 5) {
+    input_ramdata(i, i*2)
+  }
+  step(1)
+  step(1)
 	poke(c.io.cmd, 1)
 	expect(c.io.status, 0)
 	step(1)
@@ -105,24 +126,24 @@ class DotProductTopTests (c: DotProductTop) extends Tester(c) {
   step(1)
   poke(c.io.cmd, 1) 
   expect(c.io.status, 1)
-  expect(c.io.result, 1)
+  expect(c.io.result, 4)
   step(1)
   expect(c.io.status, 1)
-  expect(c.io.result, 5)   
+  expect(c.io.result, 20) // until here correct   
   step(1)
   expect(c.io.status, 2)
-  expect(c.io.result, 14) 
+  expect(c.io.result, 56) 
   step(1)
   expect(c.io.status, 3)
-  expect(c.io.result, 30) 
+  expect(c.io.result, 120) 
   step(1)
   poke(c.io.cmd, 0)
   expect(c.io.status, 0)
-  expect(c.io.result, 30) 
+  expect(c.io.result, 120) 
   step(1)
   expect(c.io.status, 0)
-  expect(c.io.result, 30) 
+  expect(c.io.result, 120) 
   step(1)
   expect(c.io.status, 0)
-  expect(c.io.result, 30)   
-}
+  expect(c.io.result, 120)   
+} 
